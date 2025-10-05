@@ -27,7 +27,7 @@ pipeline {
                 }
             }
             steps {
-                echo 'Packing the code'
+                echo 'Packing the code for release'
             }
         }
     }
