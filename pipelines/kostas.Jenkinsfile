@@ -1,12 +1,7 @@
 pipeline {
     agent any
-
     parameters {
         string(name: 'branch', defaultValue: 'main', description: 'Branch to build')
-    }
-
-    triggers {
-        cron('0 3 * * 1-5')
     }
 
     stages {
@@ -15,17 +10,36 @@ pipeline {
                 git branch: "${params.branch}", url: 'https://github.com/unkas444/jenkins-pipelines.git'
             }
         }
-        stage('build'){
-            steps {
-                echo 'Build the code'
+        stage('parallel phases'){
+            parallel{
+                stage('static analysis'){
+                    steps {
+                        echo 'Performing static analysis'
+                        sleep time: 3, unit: 'SECONDS'
+                        echo 'Static analysis complete'
+                    }
+                }
+                stage('build and test'){
+                    stages{
+                        stage('build'){
+                            steps {
+                                echo 'Building the code'
+                                sleep time: 3, unit: 'SECONDS'
+                                echo 'Build complete'
+                            }
+                        }
+                        stage('unit test'){
+                            steps {
+                                echo 'Executing unit tests'
+                                sleep time: 3, unit: 'SECONDS'
+                                echo 'Unit tests complete'
+                            }
+                        }
+                    }
+                }
             }
         }
         stage('Package'){
-            when {
-                expression {
-                    return params.branch == 'release'
-                }
-            }
             steps {
                 echo 'Packing the code for release'
             }
