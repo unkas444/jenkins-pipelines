@@ -1,21 +1,33 @@
 pipeline {
     agent any
 
-    environment {
-        SENTENCE = "hope bla"
+    parameters {
+        string(name: 'branch', defaultValue: 'main', description: 'Branch to build')
     }
+
+    triggers {
+        cron('0 3 * * 1-5')
+    }
+
     stages {
-        stage('Hello'){
+        stage('SCM'){
             steps {
-                echo 'Hello Kosta'
-
-                script {
-                    def words = env.SENTENCE.split(' ')
-
-                    for (word in words){
-                        echo word
-                    }
+                git branch: "${params.branch}", url: 'https://github.com/unkas444/jenkins-pipelines.git'
+            }
+        }
+        stage('build'){
+            steps {
+                echo 'Build the code'
+            }
+        }
+        stage('Package'){
+            when {
+                expression {
+                    return params.branch == 'release'
                 }
+            }
+            steps {
+                echo 'Packing the code'
             }
         }
     }
